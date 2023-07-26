@@ -28,17 +28,72 @@ class Tree
 
   public
 
-  def print_tree(node = root, level = 0)
+  def pretty_print(node = root, prefix = '', is_left = true)
     return if node.nil?
 
-    print_tree(node.right, level + 1)
-    puts "  " * level + node.data.to_s
-    print_tree(node.left, level + 1)
+    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
+    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
+    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+  end
+
+  def insert(value)
+    @root = insert_node(@root, value)
+  end
+
+  def delete(value)
+    @root = delete_node(@root, value)
+  end
+
+  private
+
+  def insert_node(root, value)
+    return Node.new(value) if root.nil?
+
+    if value < root.data
+      root.left = insert_node(root.left, value)
+    elsif value > root.data
+      root.right = insert_node(root.right, value)
+    end
+
+    root
+  end
+
+  def delete_node(root, value)
+    return nil if root.nil?
+
+    if value < root.data
+      root.left = delete_node(root.left, value)
+    elsif value > root.data
+      root.right = delete_node(root.right, value)
+    else
+      if root.left.nil?
+        return root.right
+      elsif root.right.nil?
+        return root.left
+      end
+
+      temp = find_min(root.right)
+      root.data = temp.data
+      root.right = delete_node(root.right, temp.data)
+    end
+
+    root
+  end
+
+  def find_min(node)
+    node = node.left until node.left.nil?
+    node
   end
 end
 
-array = [50, 30, 70, 20, 40, 60, 80]
+# Example usage:
+array = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]
 tree = Tree.new(array)
 
-puts "Binary Search Tree:"
-tree.print_tree
+tree.insert(15)
+tree.insert(10)
+
+tree.delete(8)
+
+puts "Binary Search Tree after insertions and deletions:"
+tree.pretty_print
