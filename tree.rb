@@ -95,4 +95,4 @@ tree.insert(10)
 tree.delete(8)
 
 puts "Binary Search Tree after insertions and deletions:"
-tree.pretty_prin
+tree.pretty_print
