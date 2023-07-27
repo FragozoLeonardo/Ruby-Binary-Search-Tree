@@ -7,6 +7,38 @@ class Tree
     @root = build_tree(array)
   end
 
+  def find(value)
+    find_node(@root, value)
+  end
+
+  def insert(value)
+    @root = insert_node(@root, value)
+  end
+
+  def delete(value)
+    @root = delete_node(@root, value)
+  end
+
+  def level_order(&block)
+    return level_order_array if block.nil?
+
+    queue = [@root]
+    while !queue.empty?
+      node = queue.shift
+      block.call(node)
+      queue << node.left if node.left
+      queue << node.right if node.right
+    end
+  end
+
+  def pretty_print(node = @root, prefix = '', is_left = true)
+    return if node.nil?
+
+    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
+    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
+    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+  end
+
   private
 
   def build_tree(array)
@@ -26,25 +58,17 @@ class Tree
     node
   end
 
-  public
+  def find_node(root, value)
+    return nil if root.nil?
 
-  def pretty_print(node = root, prefix = '', is_left = true)
-    return if node.nil?
-
-    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
-    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
-    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+    if value < root.data
+      find_node(root.left, value)
+    elsif value > root.data
+      find_node(root.right, value)
+    else
+      root
+    end
   end
-
-  def insert(value)
-    @root = insert_node(@root, value)
-  end
-
-  def delete(value)
-    @root = delete_node(@root, value)
-  end
-
-  private
 
   def insert_node(root, value)
     return Node.new(value) if root.nil?
@@ -84,15 +108,26 @@ class Tree
     node = node.left until node.left.nil?
     node
   end
+
+  def level_order_array
+    result = []
+    level_order { |node| result << node.data }
+    result
+  end
 end
 
-array = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324]
+# Example usage:
+array = [50, 30, 70, 20, 40, 60, 80]
 tree = Tree.new(array)
 
-tree.insert(15)
-tree.insert(10)
-
-tree.delete(8)
+node = tree.find(40)
+puts "Found node: #{node.data}" if node
 
 puts "Binary Search Tree after insertions and deletions:"
 tree.pretty_print
+
+puts "Level-order traversal:"
+tree.level_order { |node| puts node.data }
+
+level_order_array = tree.level_order
+puts "Level-order array: #{level_order_array.join(', ')}"
