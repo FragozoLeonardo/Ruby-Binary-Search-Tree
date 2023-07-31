@@ -31,7 +31,46 @@ class Tree
     end
   end
 
-  def pretty_print(node = @root, prefix = '', is_left = true)
+  def inorder(node = @root, &block)
+    return inorder_array if block.nil?
+
+    return if node.nil?
+
+    inorder(node.left, &block)
+    block.call(node)
+    inorder(node.right, &block)
+  end
+
+  def preorder(node = @root, &block)
+    return preorder_array if block.nil?
+
+    return if node.nil?
+
+    block.call(node)
+    preorder(node.left, &block)
+    preorder(node.right, &block)
+  end
+
+  def postorder(node = @root, &block)
+    return postorder_array if block.nil?
+
+    return if node.nil?
+
+    postorder(node.left, &block)
+    postorder(node.right, &block)
+    block.call(node)
+  end
+
+  def height(node = @root)
+    return -1 if node.nil?
+
+    left_height = height(node.left)
+    right_height = height(node.right)
+
+    [left_height, right_height].max + 1
+  end
+
+  def pretty_print(node = root, prefix = '', is_left = true)
     return if node.nil?
 
     pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
@@ -109,6 +148,24 @@ class Tree
     node
   end
 
+  def inorder_array
+    result = []
+    inorder { |node| result << node.data }
+    result
+  end
+
+  def preorder_array
+    result = []
+    preorder { |node| result << node.data }
+    result
+  end
+
+  def postorder_array
+    result = []
+    postorder { |node| result << node.data }
+    result
+  end
+
   def level_order_array
     result = []
     level_order { |node| result << node.data }
@@ -116,18 +173,30 @@ class Tree
   end
 end
 
-# Example usage:
 array = [50, 30, 70, 20, 40, 60, 80]
 tree = Tree.new(array)
-
-node = tree.find(40)
-puts "Found node: #{node.data}" if node
 
 puts "Binary Search Tree after insertions and deletions:"
 tree.pretty_print
 
-puts "Level-order traversal:"
-tree.level_order { |node| puts node.data }
+puts "Inorder traversal:"
+tree.inorder { |node| puts node.data }
 
-level_order_array = tree.level_order
-puts "Level-order array: #{level_order_array.join(', ')}"
+puts "Preorder traversal:"
+tree.preorder { |node| puts node.data }
+
+puts "Postorder traversal:"
+tree.postorder { |node| puts node.data }
+
+puts "Height of the root node: #{tree.height}"
+
+print "Enter a value to find the node's height: "
+value = gets.chomp.to_i
+
+node = tree.find(value)
+
+if node
+  puts "Height of the node with value #{value}: #{tree.height(node)}"
+else
+  puts "Node with value #{value} not found in the tree."
+end
