@@ -78,6 +78,39 @@ class Tree
     pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
   end
 
+  def depth(node = @root, current_depth = 0)
+    return -1 if node.nil?
+
+    left_depth = depth(node.left, current_depth + 1)
+    right_depth = depth(node.right, current_depth + 1)
+
+    [left_depth, right_depth, current_depth].max
+  end
+
+  def balanced?(node = @root)
+    return true if node.nil?
+
+    left_height = height(node.left)
+    right_height = height(node.right)
+
+    balanced_diff = (left_height - right_height).abs
+    return false if balanced_diff > 1
+
+    left_balanced = balanced?(node.left)
+    right_balanced = balanced?(node.right)
+
+    return false unless left_balanced && right_balanced
+
+    true
+  end
+
+  def rebalance
+    return if balanced?
+
+    nodes_array = inorder_array
+    @root = build_tree_balanced(nodes_array)
+  end
+
   private
 
   def build_tree(array)
@@ -173,10 +206,10 @@ class Tree
   end
 end
 
-array = [50, 30, 70, 20, 40, 60, 80]
+array = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]
 tree = Tree.new(array)
 
-puts "Binary Search Tree after insertions and deletions:"
+puts "Binary Search Tree after insertions:"
 tree.pretty_print
 
 puts "Inorder traversal:"
@@ -200,3 +233,24 @@ if node
 else
   puts "Node with value #{value} not found in the tree."
 end
+
+print "Enter a value to find the node's depth: "
+value = gets.chomp.to_i
+
+node = tree.find(value)
+
+if node
+  puts "Depth of the node with value #{value}: #{tree.depth(node)}"
+else
+  puts "Node with value #{value} not found in the tree."
+end
+
+puts "Is the tree balanced? #{tree.balanced?}"
+
+puts "Rebalancing the tree..."
+tree.rebalance
+
+puts "Is the tree balanced after rebalancing? #{tree.balanced?}"
+
+puts "Binary Search Tree after rebalancing:"
+tree.pretty_print
